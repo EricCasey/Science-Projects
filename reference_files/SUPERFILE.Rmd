@@ -1,0 +1,505 @@
+---
+title: "Casey_Works supeRfile"
+author: "Casey_Works"
+date: "August 31, 2018"
+output:  
+   html_document:
+    toc: true
+    number_sections: true
+    theme: spacelab
+---
+
+```{r engine = "R", message = FALSE, echo = FALSE, eval = FALSE, results = "hide"}
+print("SUPERFILE.Rmd Initialized", )
+```
+
+___
+# BASIC R STUFF 
+
+```{r engine = "R", message = FALSE, echo = TRUE, eval = FALSE, results = "hide"}
+paste(thing, thing, thing, sep = "-") result -> thing-thing-thing
+x < y # TRUE if x is less than y
+x <= y # TRUE if x is less than or equal to y
+x == y # TRUE if x equals y
+x != y # TRUE if x does not equal y
+x >= y # TRUE #f x is greater than or equal to y
+x > y # TRUE if x is greater than y
+x %in% c(a, b, c) # TRUE if x is in the vector c(a, b, c)
+# &, and
+# |, or
+# !, not
+# !is.na(x)
+
+# levels() #run this on categorical data to find out how many options there are
+# table() # gives you a frequency table of two categorical variables
+
+# prop.table(data, 1 or 2) # give you it proportionally
+
+# # Shuffle row indices: rows
+# rows <- sample(nrow(my_data))
+# # Randomly order data: Sonar
+# RandomRows <- my_data[rows]
+
+```
+
+____
+#_PACKAGES_
+
+## Datasets
+
+```{r engine = "R", message = FALSE, echo = TRUE, eval = FALSE, results = "hide"}
+library(mlbench) 
+data(Sonar)
+
+library(C50)
+data(churn)
+
+library(MASS)
+data(MASS)
+
+library(nasaweather)
+data(atmos)
+```
+____
+## DATA COLLECTION AND CLEANING
+```{r engine = "R", message = FALSE, echo = TRUE, eval = FALSE, results = "hide"}
+require("httr")           # Makes RESTful Requests
+require("jsonlite")       # Converts JSON to readable format (list)?
+
+library(readxl)           # Reads .xlsx files
+# data  <- read_excel("Desktop/MMA 860/ewr.xlsx", sheet = 1)
+
+library(dplyr)            # Data Manipulation (tbl datatypes)
+# glimpse(tbl)
+# TIP: Tidy Data is Variables in Columns, Oberservations in Rows
+
+# The Five Verbs: Select, Filter, Arrange, Mutate & Summarize
+
+# select(df_or_tbl, Group, Sum)
+# filter(df_or_tbl, logical test ...)
+# arrange(df_or_tbl, df_column1, df_column2, desc)
+# mutate(df_or_tbl, var = df_column1 + df_column2)
+# summarize(df_or_tbl, sum = asdf, avg = sadf, var=asdf)
+
+library(broom)
+# bdims_tidy <- augment(lm_1)
+
+# >>> Helper Functions >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+# group_by(___)
+
+# starts_with("X"): every name that starts with "X",
+# ends_with("X"): every name that ends with "X",
+# contains("X"): every name that contains "X",
+# matches("X"): every name that matches "X", where "X" can be a regular expression,
+# num_range("x", 1:5): the variables named x01, x02, x03, x04 and x05,
+# one_of(x): every name that appears in x, which should be a character vector.
+
+# min(x) - minimum value of vector x.
+# max(x) - maximum value of vector x.
+# mean(x) - mean value of vector x.
+# median(x) - median value of vector x.
+# quantile(x, p) - pth quantile of vector x.
+# sd(x) - standard deviation of vector x.
+# var(x) - variance of vector x.
+# IQR(x) - Inter Quartile Range (IQR) of vector x.
+# diff(range(x)) - total range of vector x.
+
+# first(x) - The first element of vector x.
+# last(x) - The last element of vector x.
+# nth(x, n) - The nth element of vector x.
+# n() - The number of rows in the data.frame or group of observations that summarise() describes.
+# n_distinct(x) - The number of unique values in vector x.
+
+# %>% - "Pipe", like "THEN", let's you carry initial data param input through to inner functions
+
+ts(data, frequency = 12, start = 2004) # monthly since 2004
+
+library(sqldf)
+
+
+## KMEANS CLUSTERING
+## How to determine if there are any clusters in the data, and find them out
+# Look over 1 to 15 possible clusters
+for (i in 1:15) {
+  # Fit the model: km.out
+  km.out <- kmeans(pokemon, centers = 6, nstart = 20, iter.max = 50)
+  # Save the within cluster sum of squares
+  wss[i] <- km.out$withinss
+}
+
+# Produce a scree plot
+plot(1:15, wss, type = "b", 
+     xlab = "Number of Clusters", 
+     ylab = "Within groups sum of squares")
+
+# Select number of clusters
+k <- 3
+
+# Build model with k clusters: km.out
+km.out <- kmeans(km.out, centers = k, nstart = 20, iter.max = 50)
+
+# View the resulting model
+km.out
+
+# Plot of Defense vs. Speed by cluster membership
+plot(pokemon[, c("Defense", "Speed")],
+     col = km.out$cluster,
+     main = paste("k-means clustering of Pokemon with", k, "clusters"),
+     xlab = "Defense", ylab = "Speed")
+     
+     
+summary(km_out)
+plot(x, km_out$x, col = km_out$cluster, main = "k-means with 5 clusters", xlab = "", ylab = "")
+## best outcome is "total within cluster sum of scquares"
+print(km_out$tot.withinss)
+
+## HIGHERARCHICAL CLUSTERING
+
+# returns hierarchical clustering model
+hclust.out <- hclust(d = dist(x))
+# draws a Dendrogram
+plot(hclust.out)
+```
+# Linking Cluster Methods:
+* Complete *good
+  * pairwise similarity between all obsercations in cluster 1 and cluster 2, and uses largest of similarities
+* Single *not great
+  * same as above but uses smalles of similarities
+* Average *good
+  * same as above but uses average
+* Centroid *dangerous
+  * finds centroid of cluster 1 and centrind of cluster 2, and uses similaritiy between two centroids.
+
+
+## PRINCIPLE COMPONENT ANALYSIS
+Things to consider:
+* Scaling the Data
+* Missing values
+  * imputation or exlusion
+* Categorical data
+  * throw it away
+  * encode them as numbers
+```{r engine = "R", message = FALSE, echo = TRUE, eval = FALSE, results = "hide"}
+pr.out <- prcomp(x = data, scale = FALSE, center = TRUE)
+# VIS: BIPLOT
+biplot(pr.out)
+
+summary(pr.out)
+print(pr.out$rotation)
+# Calculate variability of each component
+pr.var <- wisc.pr$sdev^2
+
+# Variance explained by each principal component: pve
+pve <- pr.var / sum(pr.var)
+plot(pve, xlab = "Principle Component",
+        ylab = "Proportion of Variance Explained",
+        ylim = c(0,1), type = "b")
+
+
+
+
+```
+
+____
+## TIME-SERIES
+```{r engine = "R", message = FALSE, echo = TRUE, eval = FALSE, results = "hide"}
+
+ts_data <- ts(ts_data$point ,start = 2004, frequency = 12) # ts function defines the dataset as timeseries starting Jan 2004 and having seasonality of frequency 12 (monthly)
+
+fit <- decompose(ts_data, type=c("multiplicative", "additive")) 
+#decompose using "classical" method, multiplicative form
+
+fit <- stl(data, t.window=12, s.window="periodic") #decompose using STL (Season and trend using Loess)
+
+# Create exponential smoothing models:
+# 1) additive vs multiplicative noise (first A vs M),
+# 2) additive vs multiplicative trend (second A vs M)
+# 3) no seasonality vs automatic detection (third N vs Z) trend and no seasonlity (AAN), multiplicative (MMN)
+ts_data_aan <- ets(ts_data, model="AAN")    # Error, Trend, Seasonality
+
+
+# Create their prediction "cones" for 360 months (30 years) into the future with quintile confidence intervals
+ts_data_aan_forecast <- forecast(ts_data_aan, h = 360, level = c(0.8, 0.95))
+
+# Create a trigonometric box-cox autoregressive trend seasonality (TBATS) model
+ElectricPrice_tbats <- tbats(ElectricPrice_ts)
+# <12,5> 12 months, 5 is the number of paired trigonometic waves used to measure seasonality
+# 
+
+#ARIMA model could also be fitted but does not work well in this case. Need ARIMA with covariates (e.g., Fourier)
+ts_data_arima <- auto.arima(ts_data, seasonal = TRUE)
+ts_data_arima_pred <- forecast(ts_data, h=360)
+
+
+
+
+
+```
+____
+## DATA VISUALIZATION
+
+```{r engine = "R", message = FALSE, echo = TRUE, eval = FALSE, results = "hide"}
+# >>>> BASE GRAPHICS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+# > HIGH Level Functions
+# plot(df or x, y, type = "o", pch = 1)
+
+# sunflowerplot(x, y, main = "title here")
+# boxplot(x, y, main = "title here")
+# barplot(height, width,...)
+# mosaicplot()
+# hist()
+# bagplot()
+# abline(a = NULL, b = NULL)
+
+# > LOW Level Functions
+# points()
+# lines()
+# text()
+# text()
+# abline()
+
+# par(mfrow = c(1, 2))  # for parameter. to set global vis variables
+
+
+library(ggplot2)
+# SCATTERPLOT:
+# ggplot(data = , aes(y = , x = ))+ geom_point()
+library(ggvis)
+
+library(lattice)             # Data In A Grid
+
+
+library(car)
+# qqPlot()
+
+library(rvest)
+library(purrr)
+
+library(corrplot)
+# corrplot(cor(mtars), method = "ellipse")
+
+library(rpart) # Decision tree models
+# treeModel <- rpart(mpg ~ ., data = mtcars)
+# plot(treeModel)
+# text(treeModel, cex = 1.6, col = "red", xpd = TRUE)
+
+library(aplpack)
+# bagplot()
+
+
+
+
+```
+____
+## DATA ANALYSIS TOOLS
+
+```{r engine = "R", message = FALSE, echo = TRUE, eval = FALSE, results = "hide"}
+# TESTING HETEROSKEDACISITY
+# GRAPH IT, WHITE IT, BREUSCH IT
+# plot(lm)
+# white.test(x, lag = 1, qstar = 2, q = 10, range = 4,
+#            type = c("Chisq","F"), scale = TRUE, …)
+# bptest(Time_on_Foodie ~ N_Pictures + N_Children + Income + M_Status + Gender, data = foodie)
+
+
+# lm(Y ~ x + x + x + ..., data = blah)
+library(estimatr)
+# lm_robust(Y ~ X1 + X2, file, se_type=”HC3”)
+
+library(car)
+#ncvTest(reg)
+
+library(sensitivity)
+#fast() # Fourier Amplitude Sensitivity Test
+
+library(konfound)
+# konfound(model_object (lm), tested_variable, alpha = 0.05, tails = 2,
+#          to_return = "print/plot", test_all = FALSE)
+
+
+# lhypo <- linearHypothesis(lm_7, c("Price = 0", "Ad_Budget = 0"))
+# print("--- L Hypo ---")
+# print(lhypo)
+
+library(corrplot)
+# corr <- cor(data)
+# #corrplot.mixed(corr, lower = "square", upper = "circle", tl.col = "black", order = "hclust")
+# corrplot(corr, lower = "square", upper = "circle", tl.col = "black", order = "AOE")
+```
+
+
+____
+## PREDICTIVE MODELLING
+
+```{r engine = "R", message = FALSE, echo = TRUE, eval = FALSE, results = "hide"}
+
+#TIP: START WITH GLMNET, THEN RANDOM FOREST, THEN
+library(caret)
+# set.seed(42)
+
+myGrid <- expand.grid(
+  alpha = 0:1,
+  lambda = seq(0.0001, 0.1, length = 10)
+)
+
+myFolds <- createFolds(data$column, k = 5)
+
+# REUSABLE CONTROL OBJECT TEMPLATE
+myControl <- trainControl(
+  method = "cv",
+  number = 10,
+  summaryFunction = twoClassSummary,
+  classProbs = TRUE, # IMPORTANT!
+  verboseIter = TRUE,
+  index = myFolds
+)
+
+# TEMPLATE FOR MODEL TRAINING WITH CARET
+model <- caret::train(formula,
+data = data,
+method = "glmnet",
+method = "ranger", # for Random Forest
+metric = "ROC", #for glmnet
+tuneGrid = myGrid,
+preProcess = c("medianImpute", "center", "scale", "nnImpute", "pca",
+               "spacialSign", "zv", "nzv"),
+trControl = myControl
+)
+
+# CONFUSION MATRIX
+#   * this is the rate at which type I & type II errors are made.
+ confusionMatrix(p_class, test[["class"]])
+
+
+
+library(caTools)
+# colAUC(p, test [["Class"]], plotROC = TRUE)
+
+# RANDOM FORESTS (SOMETIMES MORE ACCURATE THAN GLMNET)
+# Random forest have hyperparameters, Require "Tuning"
+# "mtry" is the number of variables at each split
+# Grid Search for selecting out of sample errors
+
+
+
+# # Print maximum ROC statistic
+# print(max(model[["results"]][["ROC"]]))
+
+
+# plot(lm_2$finalModel)
+# print(min(model$results$RMSE))
+
+
+## CHOOSING A MODEL
+# look for highest average AUC
+# lowest standard deviation in AUC
+
+# model_list <- list (
+#   glmnet = model_glmnet,
+#   rf = model_rf
+# )
+# resamps <- resamples(model_list)
+# summmary(resamps)
+
+library(caretEnsenble)
+#bwplot(resamples, metric = "ROC")
+#dotplot(resamples, metric = "ROC")
+# densityplot(resamples, metric = "ROC")
+# xyplot(resamples, metricc = "ROC")
+#dotplot(lots_of_samples, metric = "ROC")
+
+
+# Create ensemble model: stack
+stack <- caretStack(model_list, method = "glm")
+
+# Look at summary
+summary(stack)
+```
+____
+## TEXT MINING
+
+TYPES
+* Semantic Parsing
+    * Takes into account word-type and order
+* Bag Of Words
+    * All words in a bag
+
+CORPUS : Collection of text words
+
+
+```{r engine = "R", message = FALSE, echo = TRUE, eval = FALSE, results = "hide"}
+library(qdap)
+
+# Find the 10 most frequent terms: term_count
+term_count <- freq_terms(new_text, 10)
+
+```
+
+____
+## NOTES
+```
+# Characterizing bivariate relationships
+# > Form (linear, quadratic (shaped like a U), non-linear)
+# > Direction (positive / negative)
+# > Strength (scatter / noise)
+# > Outliers
+
+# Correlations (Only two variables, not multiple regression)
+# > Corellation coefficient between -1 and 1
+# > 0 is weak
+# > Sign -> direction
+# > Magnitude > strength
+
+# Spurious Correlation (ridiculous relationships)
+# >
+
+# # Compute errors: error
+# error <- p - test[["price"]]
+
+# # Calculate RMSE (closer to 1 the better?)
+# sqrt(mean(error^2))
+
+# Helpful to remove low variance metrics
+```
+____
+## SIX SIGMA
+```
+# DMAIC - Define, Measure, Analyze, Improve, Control (DMAIC Approach)
+```
+
+____
+## REST APIS
+```{r engine = "R", message = FALSE, echo = TRUE, eval = FALSE, results = "hide"}
+require("jsonlite")
+require("httr")
+# CoinMarketCap API
+base <- "https://min-api.cryptocompare.com/data/"
+username <- "whatever" # BeerStoreAPI is public
+password <- "whatever" # no credentials needed
+
+library(curl)
+# curl_echo("http://www.lagershed.com")
+
+
+# - GET BTC PRICE
+# endpoint <- "histoday"
+# query <- "?fsym=ETH&tsym=USD&limit=2430"
+# call <- paste(base, endpoint, query, sep = "")
+# get_list <- GET(call, authenticate(username, password, type = "basic"))
+# print(get_list)
+# get_list_resp <- content(get_list, "text")
+# get_list_json <- fromJSON(get_list_resp, flatten = TRUE)
+#
+# print(head(get_list_json))
+# View(get_list_json[["Data"]])
+# write.csv(get_list_json[["Data"]], "priceData.csv")
+```
+
+
+____
+## ML & AI Notes (Caret Mastery)
+```
+
+```
